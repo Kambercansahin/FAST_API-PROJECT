@@ -20,7 +20,7 @@ class User(Base):
         default=None,
     )
 
-    posts: Mapped[list[Post]] = relationship(back_populates="author")
+    posts: Mapped[list[Post]] = relationship(back_populates="author",cascade="all,delete-orphan") #When we delete a user, all information belonging to the deleted user must also be deleted.
 
     @property
     def image_path(self) -> str:

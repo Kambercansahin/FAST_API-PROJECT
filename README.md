@@ -1,4 +1,4 @@
-# FastAPI Enterprise Backend & AI Integration Journey
+# Modern Backend Development with FastAPI
 
 Bu repository, modern backend geliştirme pratikleri, RESTful API tasarımı ve kurumsal mimari standartlarını öğrenmek ve uygulamak amacıyla geliştirilmekte olan kapsamlı bir FastAPI projesidir.
 

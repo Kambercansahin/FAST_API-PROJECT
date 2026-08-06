@@ -14,7 +14,10 @@ router = APIRouter()
 
 @router.get("",response_model=list[PostResponse])
 async def get_post(db:Annotated[AsyncSession,Depends(get_db)]): #get all posts
-    result = await db.execute(select(models.Post).options(selectinload(models.Post.author)))
+    result = await db.execute(select(models.Post)
+                              .options(selectinload(models.Post.author))
+                              .order_by(models.Post.date_posted.desc()),
+                              )
     posts = result.scalars().all()
     return posts
 
@@ -68,7 +71,7 @@ async def update_post_patch(post_id :int, post_data:PostUpdate ,db:Annotated[Asy
     await db.refresh(post,attribute_names=["author"])
     return post
 
-@router.delete("/post_id}",status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/{post_id}",status_code=status.HTTP_204_NO_CONTENT,name="delete_post")
 async def delete_post(post_id:int , db:Annotated[AsyncSession,Depends(get_db)]):
     result = await db.execute(select(models.Post).where(models.Post.id == post_id))#take the post_id in db
     post = result.scalars().first()

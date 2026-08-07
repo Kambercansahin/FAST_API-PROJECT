@@ -11,7 +11,7 @@ from schemas import  UserUpdate,UserCreate,PostResponse,UserPublic,UserPrivate,T
 
 from datetime import timedelta
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-from auth import create_access_token,verify_access_token,hash_password,password_hash,verify_password,oauth2_scheme
+from auth import create_access_token,verify_access_token,hash_password,password_hash,verify_password,oauth2_scheme,Current_User
 from config import settings
 
 
@@ -75,37 +75,10 @@ async def login_for_access_token(form_data: Annotated[OAuth2PasswordRequestForm,
 
 
 @router.get("/me", response_model=UserPrivate)
-async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)],db: Annotated[AsyncSession, Depends(get_db)],):
-    """Get the currently authenticated user."""
-    user_id = verify_access_token(token)
-    if user_id is None:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid or expired token",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
+async def get_current_user(current_user:Current_User):
+    return current_user
 
-    # Validate user_id is a valid integer (defense against malformed JWT)
-    try:
-        user_id_int = int(user_id)
-    except (TypeError, ValueError):
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid or expired token",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
 
-    result = await db.execute(
-        select(models.User).where(models.User.id == user_id_int),
-    )
-    user = result.scalars().first()
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="User not found",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-    return user
 
 @router.get("/{user_id}",response_model=UserPublic) #get the user with user_id
 async def get_user(user_id:int,db:Annotated[AsyncSession,Depends(get_db)]):
@@ -132,7 +105,10 @@ async def get_user_posts(user_id:int,db:Annotated[AsyncSession,Depends(get_db)])
     return existing_posts #return all posts
 
 @router.patch("/{user_id}", response_model=UserPrivate)
-async def update_user(user_id: int,user_update: UserUpdate,db: Annotated[AsyncSession, Depends(get_db)]):
+async def update_user(user_id: int,user_update: UserUpdate,current_user:Current_User,db: Annotated[AsyncSession, Depends(get_db)]):
+
+    if user_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Yetkiniz yok değiştirmek için")
 
     result = await db.execute(select(models.User).where(models.User.id == user_id)) #get the user_id
     user = result.scalars().first()
@@ -176,7 +152,11 @@ async def update_user(user_id: int,user_update: UserUpdate,db: Annotated[AsyncSe
     return user
 
 @router.delete("/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_user(user_id: int, db: Annotated[AsyncSession, Depends(get_db)]):
+async def delete_user(user_id: int,current_user:Current_User, db: Annotated[AsyncSession, Depends(get_db)]):
+
+    if user_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Yetkiniz yok silmek için")
+
     result = await db.execute(select(models.User).where(models.User.id == user_id))#take the user_id
     user = result.scalars().first()
     if not user:# if user not in the db

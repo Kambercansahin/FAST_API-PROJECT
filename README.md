@@ -13,7 +13,7 @@ Proje aktif olarak geliştirilmektedir. Temel katmanlar tamamlanmış olup, güv
 *   **SQLAlchemy ORM ve CRUD Operasyonları:** Tamamlandı ✅
 *   **Asenkron Programlama (Async/Await):** Tamamlandı ✅
 *   **Modüler Mimari (APIRouter):** Tamamlandı ✅
-*   **Kimlik Doğrulama ve Yetkilendirme (JWT):** Devam Ediyor 🚧
+*   **Kimlik Doğrulama ve Yetkilendirme (JWT):** Tamamlandı ✅
 *   **Veritabanı Migrasyonları (Alembic):** Planlanıyor ⏳
 *   **Test Süreçleri (Pytest):** Planlanıyor ⏳
 *   **Docker & Docker Compose Entegrasyonu:** Planlanıyor ⏳

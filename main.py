@@ -21,9 +21,6 @@ from routers import user,post
 
 @asynccontextmanager
 async def lifespan(_app:FastAPI):
-    #startup
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
     yield
     #shutdown
     await engine.dispose()

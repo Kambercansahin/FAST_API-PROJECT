@@ -49,7 +49,7 @@ async def get_posts(post_id : int,db:Annotated[AsyncSession,Depends(get_db)]):
     post = result.scalars().first()
     if post:#if it have
         return post
-    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="404 ERROR")
+    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="Böyle bir post yok")
 
 @router.put("/{post_id}",response_model=PostResponse)
 async def update_post_all(post_id :int,post_data:PostCreate,

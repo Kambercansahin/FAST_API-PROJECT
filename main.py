@@ -6,14 +6,14 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
-from schemas import PostCreate,PostResponse,UserCreate,PostUpdate,UserUpdate
+
 from  typing import Annotated
 
 from contextlib import asynccontextmanager
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from sqlalchemy import select
+from sqlalchemy import select,text
 import models
 from database import Base,engine,get_db
 
@@ -35,6 +35,41 @@ templates = Jinja2Templates(directory="templates")
 
 app.include_router(router=user.router,prefix="/api/users",tags=["users"])
 app.include_router(router=post.router,prefix="/api/posts",tags=["posts"])
+
+#create middleware
+@app.middleware("http")
+async def add_security_headers(request: Request, call_next):
+    response = await call_next(request)
+
+    response.headers["X-Frame-Options"] = "SAMEORIGIN" #follow this rule regarding the use of this page within iframes on other sites.
+
+    response.headers["X-Content-Type-Options"] = "nosniff" #don't try to guess the type of content I sent.
+
+    #decide which referrer information to share when visiting other sites based on this rule.
+    if "Referrer-Policy" not in response.headers:
+        response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+
+    #don't add HSTS if I am working on my local computer.
+    if request.url.hostname not in ("localhost", "127.0.0.1"):
+        #use HTTPS when communicating with this site
+        response.headers["Strict-Transport-Security"] = (
+            "max-age=63072000; includeSubDomains"
+        )
+
+    return response
+
+
+@app.get("/health")
+async def health_check(db: Annotated[AsyncSession, Depends(get_db)]):
+    try:
+        await db.execute(text("SELECT 1"))
+    except Exception as exc:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Database unavailable",
+        ) from exc
+    return {"status": "healthy"}
+
 
 
 @app.get("/",include_in_schema=False,name="home")

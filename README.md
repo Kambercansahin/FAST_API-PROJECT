@@ -15,7 +15,7 @@ Proje aktif olarak geliştirilmektedir. Temel katmanlar tamamlanmış olup, güv
 *   **Modüler Mimari (APIRouter):** Tamamlandı ✅
 *   **Kimlik Doğrulama ve Yetkilendirme (JWT):** Tamamlandı ✅
 *   **Veritabanı Migrasyonları (Alembic):** Tamamlandı ✅
-*   **Test Süreçleri (Pytest):** Planlanıyor ⏳
+*   **Test Süreçleri (Pytest):** Tamamlandı ✅
 *   **Docker & Docker Compose Entegrasyonu:** Planlanıyor ⏳
 
 ---
